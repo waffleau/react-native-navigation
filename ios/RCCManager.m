@@ -1,6 +1,6 @@
 #import "RCCManager.h"
-#import "RCTBridge.h"
-#import "RCTRedBox.h"
+#import <React/RCTBridge.h>
+#import <React/RCTRedBox.h>
 #import <Foundation/Foundation.h>
 
 @interface RCCManager() <RCTBridgeDelegate>
@@ -37,8 +37,8 @@
   if (self)
   {
     self.modulesRegistry = [@{} mutableCopy];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onRNReload) name:RCTReloadNotification object:nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onRNReload) name:name:RCTJavaScriptWillStartLoadingNotification object:nil];
   }
   return self;
 }
@@ -76,14 +76,14 @@
     [self.sharedBridge.redBox showErrorMessage:[NSString stringWithFormat:@"Controllers: controller with id %@ is already registered. Make sure all of the controller id's you use are unique.", componentId]];
   }
   */
-   
+
   componentsDic[componentId] = controller;
 }
 
 -(void)unregisterController:(UIViewController*)vc
 {
   if (vc == nil) return;
-  
+
   for (NSString *key in [self.modulesRegistry allKeys])
   {
     NSMutableDictionary *componentsDic = self.modulesRegistry[key];
@@ -127,7 +127,7 @@
 
   self.bundleURL = bundleURL;
   self.sharedBridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
-  
+
   [self showSplashScreen];
 }
 
@@ -135,7 +135,7 @@
 {
   CGRect screenBounds = [UIScreen mainScreen].bounds;
   UIView *splashView = nil;
-  
+
   NSString* launchStoryBoard = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UILaunchStoryboardName"];
   if (launchStoryBoard != nil)
   {//load the splash from the storyboard that's defined in the info.plist as the LaunchScreen
@@ -155,7 +155,7 @@
   else
   {//load the splash from the DEfault image or from LaunchImage in the xcassets
     CGFloat screenHeight = screenBounds.size.height;
-    
+
     NSString* imageName = @"Default";
     if (screenHeight == 568)
       imageName = [imageName stringByAppendingString:@"-568h"];
@@ -163,13 +163,13 @@
       imageName = [imageName stringByAppendingString:@"-667h"];
     else if (screenHeight == 736)
       imageName = [imageName stringByAppendingString:@"-736h"];
-    
+
     //xcassets LaunchImage files
     UIImage *image = [UIImage imageNamed:imageName];
     if (image == nil)
     {
       imageName = @"LaunchImage";
-      
+
       if (screenHeight == 480)
         imageName = [imageName stringByAppendingString:@"-700"];
       if (screenHeight == 568)
@@ -178,21 +178,21 @@
         imageName = [imageName stringByAppendingString:@"-800-667h"];
       else if (screenHeight == 736)
         imageName = [imageName stringByAppendingString:@"-800-Portrait-736h"];
-      
+
       image = [UIImage imageNamed:imageName];
     }
-    
+
     if (image != nil)
     {
       splashView = [[UIImageView alloc] initWithImage:image];
     }
   }
-  
+
   if (splashView != nil)
   {
     UIViewController *splashVC = [[UIViewController alloc] init];
     splashVC.view = splashView;
-    
+
     id<UIApplicationDelegate> appDelegate = [UIApplication sharedApplication].delegate;
     appDelegate.window.rootViewController = splashVC;
     [appDelegate.window makeKeyAndVisible];

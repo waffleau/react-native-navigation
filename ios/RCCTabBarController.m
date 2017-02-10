@@ -1,8 +1,8 @@
 #import "RCCTabBarController.h"
 #import "RCCViewController.h"
-#import "RCTConvert.h"
+#import <React/RCTConvert.h>
 #import "RCCManager.h"
-#import "RCTUIManager.h"
+#import <React/RCTUIManager.h>
 
 @interface RCTUIManager ()
 
@@ -19,7 +19,7 @@
   dispatch_async(queue, ^{
     [[[RCCManager sharedInstance].getBridge uiManager] configureNextLayoutAnimation:nil withCallback:^(NSArray* arr){} errorCallback:^(NSArray* arr){}];
   });
-  
+
   if (tabBarController.selectedIndex != [tabBarController.viewControllers indexOfObject:viewController]) {
     [RCCTabBarController sendScreenTabChangedEvent:viewController];
   }
@@ -244,11 +244,11 @@
 +(void)sendScreenTabChangedEvent:(UIViewController*)viewController {
   if ([viewController.view isKindOfClass:[RCTRootView class]]){
     RCTRootView *rootView = (RCTRootView *)viewController.view;
-    
+
     if (rootView.appProperties && rootView.appProperties[@"navigatorEventID"]) {
       NSString *navigatorID = rootView.appProperties[@"navigatorID"];
       NSString *screenInstanceID = rootView.appProperties[@"screenInstanceID"];
-      
+
       [[[RCCManager sharedInstance] getBridge].eventDispatcher sendAppEventWithName:rootView.appProperties[@"navigatorEventID"] body:@
        {
          @"id": @"bottomTabSelected",
@@ -257,7 +257,7 @@
        }];
     }
   }
-  
+
   if ([viewController isKindOfClass:[UINavigationController class]]) {
     UINavigationController *navigationController = (UINavigationController*)viewController;
     UIViewController *topViewController = [navigationController topViewController];

@@ -5,7 +5,7 @@
 #import "RCCViewController.h"
 #import "RCCDrawerController.h"
 #import "RCCLightBox.h"
-#import "RCTConvert.h"
+#import <React/RCTConvert.h>
 #import "RCCTabBarController.h"
 #import "RCCTheSideBarManagerViewController.h"
 #import "RCCNotification.h"
@@ -56,11 +56,11 @@ RCT_EXPORT_MODULE(RCCManager);
     {
         [returnAllPresenters addObject:modalPresenterViewController];
     }
-    
+
     while (modalPresenterViewController.presentedViewController != nil)
     {
         modalPresenterViewController = modalPresenterViewController.presentedViewController;
-        
+
         if (returnAllPresenters != nil)
         {
             [returnAllPresenters addObject:modalPresenterViewController];
@@ -106,7 +106,7 @@ RCT_EXPORT_MODULE(RCCManager);
                      completion:^(BOOL finished)
      {
          [snapshot removeFromSuperview];
-         
+
          if (resolve != nil)
          {
              resolve(nil);
@@ -124,12 +124,12 @@ RCT_EXPORT_MODULE(RCCManager);
             for (UIViewController *viewController in allPresentedViewControllers)
             {
                 counter++;
-                
+
                 [[RCCManager sharedIntance] unregisterController:viewController];
                 if (viewController.presentedViewController != nil)
                 {
                     dispatch_semaphore_t dismiss_sema = dispatch_semaphore_create(0);
-                    
+
                     dispatch_async(dispatch_get_main_queue(), ^
                     {
                         [viewController dismissViewControllerAnimated:NO completion:^()
@@ -137,7 +137,7 @@ RCT_EXPORT_MODULE(RCCManager);
                              if (counter == allPresentedViewControllers.count && allPresentedViewControllers.count > 0)
                              {
                                  [allPresentedViewControllers removeAllObjects];
-                                 
+
                                  if (resolve != nil)
                                  {
                                      resolve(nil);
@@ -146,13 +146,13 @@ RCT_EXPORT_MODULE(RCCManager);
                              dispatch_semaphore_signal(dismiss_sema);
                          }];
                     });
-                    
+
                     dispatch_semaphore_wait(dismiss_sema, DISPATCH_TIME_FOREVER);
                 }
                 else if (counter == allPresentedViewControllers.count && allPresentedViewControllers.count > 0)
                 {
                     [allPresentedViewControllers removeAllObjects];
-                    
+
                     if (resolve != nil)
                     {
                         dispatch_async(dispatch_get_main_queue(), ^
@@ -179,7 +179,7 @@ setRootController:(NSDictionary*)layout animationType:(NSString*)animationType g
         [self deferSetRootControllerWhileBridgeLoading:layout animationType:animationType globalProps:globalProps];
         return;
     }
-    
+
     dispatch_async(dispatch_get_main_queue(), ^{
         [self performSetRootController:layout animationType:animationType globalProps:globalProps];
    });
@@ -199,14 +199,14 @@ setRootController:(NSDictionary*)layout animationType:(NSString*)animationType g
 {
     // first clear the registry to remove any refernece to the previous controllers
     [[RCCManager sharedInstance] clearModuleRegistry];
-    
+
     // create the new controller
     UIViewController *controller = [RCCViewController controllerWithLayout:layout globalProps:globalProps bridge:[[RCCManager sharedInstance] getBridge]];
     if (controller == nil) return;
-    
+
     id<UIApplicationDelegate> appDelegate = [UIApplication sharedApplication].delegate;
     BOOL animated = !((appDelegate.window.rootViewController == nil) || ([animationType isEqualToString:@"none"]));
-    
+
     // if we're animating - add a snapshot now
     UIViewController *presentedViewController = nil;
     UIView *snapshot = nil;
@@ -216,11 +216,11 @@ setRootController:(NSDictionary*)layout animationType:(NSString*)animationType g
             presentedViewController = appDelegate.window.rootViewController.presentedViewController;
         else
             presentedViewController = appDelegate.window.rootViewController;
-        
+
         snapshot = [presentedViewController.view snapshotViewAfterScreenUpdates:NO];
         [appDelegate.window.rootViewController.view addSubview:snapshot];
     }
-    
+
     // dismiss the modal controllers without animation just so they can be released
     [self dismissAllControllers:@"none" resolver:^(id result)
      {
@@ -228,7 +228,7 @@ setRootController:(NSDictionary*)layout animationType:(NSString*)animationType g
          appDelegate.window.rootViewController = controller;
          [appDelegate.window makeKeyAndVisible];
          [presentedViewController dismissViewControllerAnimated:NO completion:nil];
-         
+
          if (animated)
          {
              // move the snaphot to the new root and animate it
@@ -267,7 +267,7 @@ TabBarControllerIOS:(NSString*)controllerId performAction:(NSString*)performActi
                                                 error:[RCCManagerModule rccErrorWithCode:RCCManagerModuleMissingParamsErrorCode description:@"missing params"]];
         return;
     }
-    
+
     RCCTabBarController* controller = [[RCCManager sharedInstance] getControllerWithId:controllerId componentType:@"TabBarControllerIOS"];
     if (!controller || ![controller isKindOfClass:[RCCTabBarController class]])
     {
@@ -321,7 +321,7 @@ dismissController:(NSString*)animationType resolver:(RCTPromiseResolveBlock)reso
     if ([self viewControllerIsModal:vc])
     {
         [[RCCManager sharedIntance] unregisterController:vc];
-        
+
         [vc dismissViewControllerAnimated:![animationType isEqualToString:@"none"]
                                completion:^(){ resolve(nil); }];
     }
@@ -339,17 +339,17 @@ dismissAllControllers:(NSString*)animationType resolver:(RCTPromiseResolveBlock)
         resolve(nil);
         return;
     }
-    
+
     NSMutableArray *allPresentedViewControllers = [NSMutableArray array];
     [RCCManagerModule modalPresenterViewControllers:allPresentedViewControllers];
-    
+
     BOOL animated = ![animationType isEqualToString:@"none"];
     if (animated)
     {
         id<UIApplicationDelegate> appDelegate = [UIApplication sharedApplication].delegate;
         UIView *snapshot = [appDelegate.window snapshotViewAfterScreenUpdates:NO];
         [appDelegate.window addSubview:snapshot];
-        
+
         [self dismissAllModalPresenters:allPresentedViewControllers resolver:^(id result)
         {
             [self animateSnapshot:snapshot animationType:animationType resolver:resolve];

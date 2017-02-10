@@ -6,9 +6,9 @@
 //  Copyright © 2016 artal. All rights reserved.
 //
 
-#import "RCTHelpers.h"
-#import "RCTView.h"
-#import "RCTScrollView.h"
+#import <React/RCTHelpers.h>
+#import <React/RCTView.h>
+#import <React/RCTScrollView.h>
 
 @implementation RCTHelpers
 
@@ -34,9 +34,9 @@
 #ifndef DEBUG
     return YES;
 #endif
-    
+
     BOOL removed = NO;
-    
+
     NSArray* subviews = [self getAllSubviewsForView:reactRootView];
     for (UIView *view in subviews)
     {
@@ -44,7 +44,7 @@
         {
             CGFloat r, g, b, a;
             [view.backgroundColor getRed:&r green:&g blue:&b alpha:&a];
-            
+
             //identify the yellow view by its hard-coded color and height
             if((lrint(r * 255) == 250) && (lrint(g * 255) == 186) && (lrint(b * 255) == 48) && (lrint(a * 100) == 95) && (view.frame.size.height == 46))
             {
@@ -58,19 +58,19 @@
                         break;
                     }
                 }
-                
+
                 [yelloboxParentView removeFromSuperview];
                 removed = YES;
                 break;
             }
         }
-        
+
         if (removed)
         {
             break;
         }
     }
-    
+
     return removed;
 }
 
